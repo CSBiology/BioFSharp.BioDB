@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net47</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Authors>Timo Muehlhaus, Sabrina Goedel, Kevin Schneider, CSBiology open source contributors</Authors>
+    <Description>Programmatic access to Biological Databases from F#</Description>
+    <Summary>Programmatic access to Biological Databases from F#</Summary>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://csbiology.github.io/BioFSharp.BioDB</PackageProjectUrl>
+    <PackageTags>fsharp csharp dotnet bioinformatics data-access</PackageTags>
+    <PackageIconUrl>https://raw.githubusercontent.com/CSBiology/BioFSharp/master/docsrc/files/img/logo.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/CSBiology/BioFSharp.BioDB</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <FsDocsLicenseLink>https://github.com/CSBiology/BioFSharp.BioDB/blob/main/LICENSE</FsDocsLicenseLink>
+    <FsDocsReleaseNotesLink>https://github.com/CSBiology/BioFSharp.BioDB/blob/main/RELEASE_NOTES.md</FsDocsReleaseNotesLink>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\ebiProteinsAPIswagger.json" />
+    <Compile Include="EbiAPI.fs" />
+    <Compile Include="GEO.fs" />
+    <Compile Include="Entrez.fs" />
+    <Compile Include="FaToolDb.fs" />
+    <Compile Include="Library.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Data.Services" />
+    <Reference Include="System.Data.Services.Client" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="YamlDotNet" Version="9.1.4" />
+    <PackageReference Include="FSharp.Data.TypeProviders" Version="5.0.0.6" />
+    <PackageReference Include="Http.fs" Version="5.4.0" />
+    <PackageReference Include="SwaggerProvider" Version="0.12.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Playground\" />
+  </ItemGroup>
+
+</Project>
+
