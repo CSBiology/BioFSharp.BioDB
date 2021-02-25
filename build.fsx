@@ -70,6 +70,8 @@ module ProjectInfo =
     let gitOwner = "CSBiology"
     let gitName = "BioFSharp.BioDB"
 
+    let solutionFile = "BioFSharp.BioDB.sln"
+
     let gitHome = sprintf "%s/%s" "https://github.com" gitOwner
 
     let projectRepo = sprintf "%s/%s/%s" "https://github.com" gitOwner gitName
@@ -113,12 +115,29 @@ module BasicTasks =
         |> Shell.cleanDirs 
     }
 
-    let build = BuildTask.create "Build" [clean] {
+    let restore = BuildTask.create "Restore" [clean] {
         !! "src/**/*.*proj"
-        |> Seq.iter (DotNet.build id)
+        |> Seq.iter (DotNet.restore id)
     }
 
-    let copyBinaries = BuildTask.create "CopyBinaries" [clean; build] {
+    let build = BuildTask.create "Build" [clean; restore] {
+        let setParams (defaults:MSBuildParams) =
+            { defaults with
+                Verbosity = Some(Quiet)
+                Targets = ["Build"]
+                Properties =
+                    [
+                        "Optimize", "True"
+                        "DebugSymbols", "True"
+                        "Configuration", configuration
+                        "VersionPrefix", release.NugetVersion
+                        if isPrerelease then ("VersionSuffix",prereleaseSuffix)
+                    ]
+             }
+        MSBuild.build setParams solutionFile
+    }
+
+    let copyBinaries = BuildTask.create "CopyBinaries" [clean; restore; build] {
         let targets = 
             !! "src/**/*.??proj"
             -- "src/**/*.shproj"
@@ -134,15 +153,82 @@ module TestTasks =
     open ProjectInfo
     open BasicTasks
 
-    let runTests = BuildTask.create "RunTests" [clean; build; copyBinaries] {
-        let standardParams = Fake.DotNet.MSBuild.CliArguments.Create ()
-        Fake.DotNet.DotNet.test(fun testParams ->
-            {
-                testParams with
-                    Logger = Some "console;verbosity=detailed"
-            }
-        ) testProject
+    let testAssemblies = "tests/**/bin" </> configuration </> "**" </> "*Tests.exe"
+
+    let runTests = BuildTask.create "runTests" [clean; restore; build; copyBinaries] {
+        let assemblies = !! testAssemblies
+
+        assemblies
+        |> Seq.iter (fun f ->
+            Command.RawCommand (
+                f,
+                Arguments.OfArgs []
+            )
+            |> CreateProcess.fromCommand
+            |> CreateProcess.withFramework
+            |> CreateProcess.ensureExitCode
+            |> Proc.run
+            |> ignore
+        )
+    }
+
+/// Package creation
+module PackageTasks = 
+
+    open ProjectInfo
+
+    open BasicTasks
+    open TestTasks
+
+    let pack = BuildTask.create "Pack" [clean; restore; build; runTests; copyBinaries] {
+        if promptYesNo (sprintf "creating stable package with version %s OK?" stableVersionTag ) 
+            then
+                !! "src/**/*.*proj"
+                |> Seq.iter (Fake.DotNet.DotNet.pack (fun p ->
+                    let msBuildParams =
+                        {p.MSBuildParams with 
+                            Properties = ([
+                                "Version",stableVersionTag
+                                "PackageReleaseNotes",  (release.Notes |> String.concat "\r\n")
+                                "TargetFrameworks","net47"
+                            ] @ p.MSBuildParams.Properties)
+                        }
+                    {
+                        p with 
+                            MSBuildParams = msBuildParams
+                            OutputPath = Some pkgDir
+                    }
+                ))
+        else failwith "aborted"
+    }
+
+    let packPrerelease = BuildTask.create "PackPrerelease" [setPrereleaseTag; clean; restore; build; runTests; copyBinaries] {
+        if promptYesNo (sprintf "package tag will be %s OK?" prereleaseTag )
+            then 
+                !! "src/**/*.*proj"
+                //-- "src/**/Plotly.NET.Interactive.fsproj"
+                |> Seq.iter (Fake.DotNet.DotNet.pack (fun p ->
+                            let msBuildParams =
+                                {p.MSBuildParams with 
+                                    Properties = ([
+                                        "Version", prereleaseTag
+                                        "PackageReleaseNotes",  (release.Notes |> String.toLines )
+                                        "TargetFrameworks","net47"
+                                    ] @ p.MSBuildParams.Properties)
+                                }
+                            {
+                                p with 
+                                    VersionSuffix = Some prereleaseSuffix
+                                    OutputPath = Some pkgDir
+                                    MSBuildParams = msBuildParams
+                            }
+                ))
+        else
+            failwith "aborted"
     }
 
 open BasicTasks
-BuildTask.runOrDefault copyBinaries
+open TestTasks
+open PackageTasks
+
+BuildTask.runOrDefault pack

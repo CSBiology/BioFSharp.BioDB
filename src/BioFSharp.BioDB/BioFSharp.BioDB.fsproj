@@ -1,7 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net47</TargetFramework>
+    <RootNamespace>BioFSharp.BioDB</RootNamespace>
+    <AssemblyName>BioFSharp.BioDB</AssemblyName>
+    <Name>BioFSharp.BioDB</Name>
+    <OutputType>Library</OutputType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Optional: Declare that the Repository URL can be published to NuSpec -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <!-- Optional: Embed source files that are not tracked by the source control manager to the PDB -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <!-- Optional: Include PDB in the built .nupkg -->
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
   <PropertyGroup>
     <Authors>Timo Muehlhaus, Sabrina Goedel, Kevin Schneider, CSBiology open source contributors</Authors>
@@ -17,6 +31,10 @@
     <FsDocsReleaseNotesLink>https://github.com/CSBiology/BioFSharp.BioDB/blob/main/RELEASE_NOTES.md</FsDocsReleaseNotesLink>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="Playground\EbiAPI.fsx" />
+    <None Include="Playground\Entrez.fsx" />
+    <None Include="Playground\FaToolDb.fsx" />
+    <None Include="Playground\GEO.fsx" />
     <EmbeddedResource Include="Resources\ebiProteinsAPIswagger.json" />
     <Compile Include="EbiAPI.fs" />
     <Compile Include="GEO.fs" />
@@ -27,15 +45,15 @@
   <ItemGroup>
     <Reference Include="System.Data.Services" />
     <Reference Include="System.Data.Services.Client" />
+    <PackageReference Include="NuGet.Build.Tasks.Pack" Version="5.2.0"/>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="YamlDotNet" Version="9.1.4" />
     <PackageReference Include="FSharp.Data.TypeProviders" Version="5.0.0.6" />
     <PackageReference Include="Http.fs" Version="5.4.0" />
     <PackageReference Include="SwaggerProvider" Version="0.12.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Playground\" />
-  </ItemGroup>
+  <ItemGroup />
 
 </Project>
 
