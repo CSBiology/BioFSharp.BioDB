@@ -110,6 +110,8 @@ module BasicTasks =
     let clean = BuildTask.create "Clean" [] {
         !! "src/**/bin"
         ++ "src/**/obj"
+        ++ "tests/**/bin"
+        ++ "tests/**/obj"
         ++ "pkg"
         ++ "bin"
         |> Shell.cleanDirs 
