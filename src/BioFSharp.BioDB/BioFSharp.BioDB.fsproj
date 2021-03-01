@@ -45,6 +45,7 @@
   <ItemGroup>
     <Reference Include="System.Data.Services" />
     <Reference Include="System.Data.Services.Client" />
+    <PackageReference Update="FSharp.Core" Version="4.*"/>
     <PackageReference Include="NuGet.Build.Tasks.Pack" Version="5.2.0"/>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="YamlDotNet" Version="9.1.4" />

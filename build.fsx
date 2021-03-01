@@ -117,6 +117,7 @@ module BasicTasks =
 
     let restore = BuildTask.create "Restore" [clean] {
         !! "src/**/*.*proj"
+        ++ "tests/**/*.*proj"
         |> Seq.iter (DotNet.restore id)
     }
 
